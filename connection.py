@@ -59,9 +59,9 @@ class MilvusDbConnection:
     def search(self,data):
         res = self.client.search(
             collection_name=self.collection_name,
-            data=[data],
+            data=data,
             limit=5, # Max. number of search results to return
-            search_params={"metric_type": "COSINE", "params": {'radius':-0.5}}, # Search parameters
+            search_params={"metric_type": "COSINE"}, # Search parameters
             output_fields=["title","meta","text"]
         )
 
@@ -69,3 +69,9 @@ class MilvusDbConnection:
             
     def close_connection(self):
         self.client.close()
+
+    def load_collection(self,collection_name):
+        return self.client.load_collection(collection_name=collection_name)
+    
+    def get_load_state(self,collection_name):
+        return self.client.get_load_state(collection_name=collection_name)

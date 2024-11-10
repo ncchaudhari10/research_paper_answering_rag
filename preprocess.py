@@ -1,6 +1,9 @@
-from docling.document_converter import DocumentConverter
 from pymilvus import model
-from docling_core.transforms.chunker import HierarchicalChunker
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -19,8 +22,18 @@ from openai import OpenAI
 class Preprocess:
 
     def __init__(self,file_path=None):
-     
-        self.converter = DocumentConverter()
+        
+
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.do_ocr = True
+        pipeline_options.ocr_options.use_gpu = True  # <-- set this.
+        pipeline_options.do_table_structure = True
+        pipeline_options.table_structure_options.do_cell_matching = True
+        
+        self.converter = DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            })
 
         self.text_splitter = RecursiveCharacterTextSplitter(
 
