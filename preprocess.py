@@ -1,4 +1,5 @@
 from docling.document_converter import DocumentConverter
+from pymilvus import model
 from docling_core.transforms.chunker import HierarchicalChunker
 
 import warnings
@@ -33,10 +34,15 @@ class Preprocess:
         if file_path:
             self.data = self.setup()
         load_dotenv()
-        os.environ['OPENAI_API_KEY']=os.getenv('OPENAI_API_KEY')
+        OPENAI_API_KEY=os.getenv('OPENAI_API_KEY')
 
         self.openai = OpenAI()
         self.model="text-embedding-3-small"
+        self.openai_ef = model.dense.OpenAIEmbeddingFunction(
+            model_name='text-embedding-3-small', # Specify the model name
+            api_key=OPENAI_API_KEY, # Provide your OpenAI API key
+            dimensions=1536 # Set the embedding dimensionality
+        )
 
     def setup(self):
 
@@ -115,7 +121,6 @@ class Preprocess:
             'text': text_data
             })
 
-    def get_embedding(self,text):
-        text = text.replace("\n", " ")
-        return self.openai.embeddings.create(input = [text], model=self.model).data[0].embedding
+    def get_embedding(self,docs):
+        return self.openai_ef.encode_documents(docs)
 

@@ -1,0 +1,6 @@
+.env
+volumes/
+.DS_Store
+data.pkl
+__pycache__/connection.cpython-310.pyc
+__pycache__/preprocess.cpython-310.pyc

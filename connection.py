@@ -69,4 +69,3 @@ class MilvusDbConnection:
             
     def close_connection(self):
         self.client.close()
-
