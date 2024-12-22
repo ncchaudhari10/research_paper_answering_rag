@@ -1,13 +1,12 @@
-from docling.document_converter import DocumentConverter
-from docling_core.transforms.chunker import HierarchicalChunker
-
 import warnings
+
+from docling.document_converter import DocumentConverter
+
 warnings.filterwarnings("ignore")
 
 
 import os
 from dotenv import load_dotenv
-import json
 
 import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -118,4 +117,40 @@ class Preprocess:
     def get_embedding(self,text):
         text = text.replace("\n", " ")
         return self.openai.embeddings.create(input = [text], model=self.model).data[0].embedding
+
+    def get_chat_completion(self, context, question):
+        # Format the prompt using the provided template
+        prompt_template = """
+        Answer the following question with the help of context provided. You must also list the exact source of the information, including the paper title and the section from where the information is derived.
+
+        Here is an example of what the answer should look like:
+        '''
+        Answer: (The answer to the question)
+        Source: (The source of the answer, including the paper title and section)
+        '''
+
+        Here is the context and the question you need to answer:
+
+        Context: {context}
+
+        Question: {question}
+
+        Answer:
+        """
+        prompt = prompt_template.format(context=context, question=question)
+        print("Prompt:", prompt)
+
+        # Call OpenAI's Chat Completion API
+        response = self.openai.chat.completions.create(
+            model="gpt-4o-mini", 
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+        )
+
+        # Extract and return the answer from the response
+        answer = response.choices[0].message.content
+        return answer
+
 

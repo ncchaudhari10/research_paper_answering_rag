@@ -41,7 +41,7 @@ class MilvusDbConnection:
         index_params.add_index(
             field_name="embedding",
             metric_type="COSINE",
-            index_type="FLAT",
+            index_type="IVF_FLAT",
             index_name="embedding_index",
             params={ "nlist": 1024 }
         )
@@ -55,13 +55,14 @@ class MilvusDbConnection:
 
     def insert_data(self,data):
         self.client.insert(collection_name=self.collection_name, data=data)
+        self.client.load_collection(collection_name=self.collection_name)  # Flush the collection to make data queryable
     
     def search(self,data):
         res = self.client.search(
             collection_name=self.collection_name,
             data=[data],
             limit=5, # Max. number of search results to return
-            search_params={"metric_type": "COSINE", "params": {'radius':-0.5}}, # Search parameters
+            search_params={"metric_type": "COSINE","params":{}}, # Search parameters
             output_fields=["title","meta","text"]
         )
 
